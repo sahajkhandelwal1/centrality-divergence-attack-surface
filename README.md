@@ -1,10 +1,15 @@
-# Percolation Threshold via Centrality Divergence
+# Centrality Divergence Attack Surface (CDAS)
 
 A research codebase and paper studying how **disagreement between betweenness centrality (BC) and eigenvector centrality (EC)** creates an exploitable gap between two targeted-attack strategies on random networks.
 
+**Target venue:** IEEE Transactions on Network Science and Engineering (IEEE TNSE)
+**Format:** IEEEtran (`\documentclass[journal]{IEEEtran}`)
+
+---
+
 ## Core Question
 
-Prior work asks *which* centrality measure guides better attacks. This project asks: **what happens structurally when the two measures disagree about who the critical nodes are?**
+Prior work asks *which* centrality measure guides better attacks on networks. This project asks: **what happens structurally when the two measures disagree about who the critical nodes are?**
 
 ## Central Claim
 
@@ -12,14 +17,14 @@ Centrality divergence — quantified by Kendall τ between BC and EC node rankin
 
 **Δf = f_c(EC) − f_c(BC)**
 
-between the percolation thresholds of a BC-attacker and an EC-attacker. The sign and magnitude of this gap is determined by the network model.
+between the percolation thresholds of a BC-attacker and an EC-attacker. The sign and magnitude of this gap is determined by the network topology.
 
 ## Novel Contributions
 
-1. **Centrality Divergence Attack Surface (CDAS)** — formal definition with mathematical grounding
+1. **Centrality Divergence Attack Surface (CDAS)** — formal definition of the signed threshold gap induced by BC/EC disagreement
 2. **Empirical mapping of Δf vs. τ** across Erdős–Rényi (ER), Barabási–Albert (BA), and Watts–Strogatz (WS) network families
-3. **Asymmetric τ evolution during attack** — τ_BC(t) and τ_EC(t) diverge mid-collapse; the point of maximum divergence precedes the first attacker's threshold by a measurable lag; mechanistic explanation for why Δf exists
-4. **τ divergence rate as early-warning signal** — d[τ_BC(t) − τ_EC(t)]/dt peaks before the first threshold
+3. **Asymmetric τ evolution during attack** — τ_BC(t) and τ_EC(t) diverge mid-collapse; the point of maximum divergence precedes the first attacker's threshold by a measurable lag
+4. **τ divergence rate as early-warning signal** — d[τ_BC(t) − τ_EC(t)]/dt peaks before the first threshold; quantified per model
 5. **Finite-size scaling** — threshold estimate validation at N ∈ {500, 1000, 2000}
 
 ## Mathematical Framework
@@ -54,7 +59,7 @@ Two independent attackers (BC-ranker, EC-ranker) perform **batched adaptive atta
 - Susceptibility χ(f)
 - Kendall τ between BC and EC on the residual graph, tracked separately per attacker
 
-Threshold estimator: f_c = argmax χ̄(f), where χ̄ is averaged across realizations before taking the argmax.
+Threshold estimator: f_c = argmax χ̄(f), where χ̄ is averaged across realizations *before* taking the argmax.
 
 ## Paper Figures (7 total)
 
@@ -85,7 +90,7 @@ Threshold estimator: f_c = argmax χ̄(f), where χ̄ is averaged across realiza
 ├── tests/              # pytest test suite
 ├── data/               # .npz output (gitignored)
 └── paper/
-    └── main.tex        # two-column PRE-format paper
+    └── main.tex        # IEEEtran journal format
 ```
 
 ## Dependencies
@@ -124,13 +129,17 @@ cd paper && pdflatex main.tex && pdflatex main.tex
 
 ## Validation Checks
 
-1. **ER Molloy-Reed**: random-removal f_c ≈ 1 − 1/⟨k⟩ within 5% for ⟨k⟩ ∈ {3, 5, 8}
+1. **Molloy-Reed**: random-removal f_c ≈ 1 − 1/⟨k⟩ within 5% for ⟨k⟩ ∈ {3, 5, 8} on ER graphs
 2. **Albert et al. 2000 replication**: BC-attacker dismantles BA (m=3) faster than random removal
 
-## Paper
+## Related Work
 
-Target venue: Physical Review E (two-column, revtex4-2 format). See `paper/main.tex`.
+- Albert, Jeong & Barabási (2000) — error and attack tolerance of complex networks
+- Holme et al. (2002) — attack vulnerability of complex networks
+- Molloy & Reed (1995) — critical random graphs with a given degree sequence
+- Barabási & Albert (1999) — emergence of scaling in random networks
+- Watts & Strogatz (1998) — collective dynamics of small-world networks
 
 ---
 
-*Research project — Percolation Threshold Across Betweenness and Eigenvector Centrality*
+*IEEE TNSE submission — Centrality Divergence Attack Surface in Random Network Percolation*
