@@ -2,8 +2,7 @@
 
 A research codebase and paper studying how **disagreement between betweenness centrality (BC) and eigenvector centrality (EC)** creates an exploitable gap between two targeted-attack strategies on random networks.
 
-**Target venue:** IEEE Transactions on Network Science and Engineering (IEEE TNSE)
-**Format:** IEEEtran (`\documentclass[journal]{IEEEtran}`)
+
 
 ---
 
