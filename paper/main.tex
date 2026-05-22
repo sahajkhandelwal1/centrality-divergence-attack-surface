@@ -1,0 +1,314 @@
+\documentclass[journal]{IEEEtran}
+\usepackage{amsmath,amssymb,graphicx,booktabs,hyperref,cite}
+\graphicspath{{../figures/}}
+
+\begin{document}
+
+\title{Centrality Divergence Attack Surface: How Betweenness--Eigenvector
+Disagreement Determines Percolation Threshold Gaps in Random Networks}
+
+\author{\IEEEauthorblockN{Author Name}
+\IEEEauthorblockA{Department of Computer Science\\
+Institution Name\\
+City, Country\\
+email@institution.edu}}
+
+\maketitle
+
+\begin{abstract}
+We study the structural consequence of disagreement between betweenness
+centrality~(BC) and eigenvector centrality~(EC) in targeted-attack percolation
+on random networks.
+We define the \emph{centrality divergence attack surface}~(CDAS) as the signed
+gap $\Delta f = f_c^{\rm EC} - f_c^{\rm BC}$ between the percolation thresholds
+of a BC-guided and an EC-guided attacker.
+Sweeping Erd\H{o}s--R\'enyi~(ER), Barab\'asi--Albert~(BA), and
+Watts--Strogatz~(WS) graph families, we show that $\Delta f$ correlates with
+Kendall~$\tau$ between BC and EC rankings and that its sign and magnitude are
+topology-dependent.
+We further demonstrate that $\tau$ evolves \emph{asymmetrically} under the two
+attacks---the divergence rate
+$\delta(f)=d[\tau_{\rm BC}(f)-\tau_{\rm EC}(f)]/df$ peaks before the first
+attacker's threshold, constituting a structural early-warning signal of network
+collapse.
+Finite-size scaling confirms threshold convergence by $N=1000$.
+\end{abstract}
+
+\begin{IEEEkeywords}
+network robustness, percolation threshold, centrality measures, betweenness
+centrality, eigenvector centrality, targeted attacks, random graphs, Kendall tau
+\end{IEEEkeywords}
+
+% ── 1. Introduction ───────────────────────────────────────────────────────────
+\section{Introduction}
+
+Targeted attacks on complex networks---removing nodes by centrality
+rank---have been studied since Albert, Jeong, and Barab\'asi demonstrated the
+fragility of scale-free networks to hub removal~\cite{Albert2000}.
+Most work asks \emph{which} centrality measure guides the most effective
+attack~\cite{Holme2002,Iyer2013}.
+We pose a different question: what structural consequence arises when betweenness
+centrality~(BC) and eigenvector centrality~(EC) \emph{disagree} about which
+nodes are critical?
+
+We define the \emph{centrality divergence attack surface}~(CDAS) as the signed
+threshold gap
+\begin{equation}
+  \Delta(G) = f_c(G,\pi_{\rm EC}) - f_c(G,\pi_{\rm BC}),
+  \label{eq:cdas}
+\end{equation}
+where $f_c(G,\pi)$ is the percolation threshold under attack permutation $\pi$.
+$\Delta>0$ means the BC-attacker reaches the threshold earlier; $\Delta<0$ means
+EC wins.
+We show that $\Delta$ is predicted by the initial Kendall~$\tau$ between BC and
+EC rankings, and that its sign and magnitude are topology-dependent.
+
+Our contributions are:
+(1)~formal definition of CDAS with mathematical grounding;
+(2)~empirical mapping of $\Delta f$ vs.\ $\tau$ across ER, BA, and WS;
+(3)~demonstration of asymmetric $\tau$ evolution during attack;
+(4)~identification of $\delta(f)$ as an early-warning signal preceding collapse;
+and
+(5)~finite-size scaling validation.
+
+% ── 2. Mathematical Framework ─────────────────────────────────────────────────
+\section{Mathematical Framework}
+
+Let $G=(V,E)$ be an undirected simple graph with $n=|V|$.
+After removing a fraction $f$ of nodes according to permutation
+$\pi:V\to\{1,\ldots,n\}$ by decreasing centrality, the residual graph is
+$G_f$.
+
+\textit{Giant component fraction.}
+$S(G,f)=|C_{\max}(G_f)|/n$, where $C_{\max}(G_f)$ is the largest connected
+component.
+
+\textit{Finite-size susceptibility.}
+\begin{equation}
+  \chi(G,f)=\frac{1}{n}\sum_{\substack{C\in\mathcal{C}(G_f)\\C\neq C_{\max}}}
+  |C|^{2}.
+  \label{eq:chi}
+\end{equation}
+The percolation threshold is
+\begin{equation}
+  f_c(G,\pi)=\arg\max_f\,\bar{\chi}(f),\quad
+  \bar{\chi}(f)=\langle\chi(G,f)\rangle,
+  \label{eq:fc}
+\end{equation}
+where $\langle\cdot\rangle$ denotes the average over graph realizations, taken
+\emph{before} the argmax.
+
+\textit{Betweenness centrality.}
+$B(v)=\sum_{s\neq v\neq t}\sigma_{st}(v)/\sigma_{st}$, where $\sigma_{st}$ is
+the number of shortest paths from $s$ to $t$ and $\sigma_{st}(v)$ the number
+passing through $v$.
+
+\textit{Eigenvector centrality.}
+$\mathbf{A}\mathbf{x}=\lambda_1\mathbf{x}$; $E(v)=x_v$ with
+$\|\mathbf{x}\|_2=1$, $\lambda_1$ the spectral radius.
+
+\textit{Kendall $\tau$.}
+Let $\pi_B$, $\pi_E$ denote orderings by decreasing $B$ and $E$.
+\begin{equation}
+  \tau(\pi_B,\pi_E)=\frac{C-D}{n(n-1)/2},
+  \label{eq:tau}
+\end{equation}
+where $C$~($D$) counts concordant~(discordant) pairs.
+
+\textit{Gap metric.}
+$\Delta(G)=f_c(G,\pi_{\rm EC})-f_c(G,\pi_{\rm BC})$ (Eq.~\ref{eq:cdas}).
+
+\textit{Validation anchor (Molloy--Reed).}
+For random removal on ER graphs~\cite{MolloyReed1995},
+\begin{equation}
+  f_c^{\rm rand}=1-\frac{\langle k\rangle}{\langle k^2\rangle-\langle k\rangle}.
+  \label{eq:mr}
+\end{equation}
+For a Poisson degree distribution, $\langle k^2\rangle=\langle k\rangle
+(\langle k\rangle+1)$, giving $f_c^{\rm rand}\approx 1-1/\langle k\rangle$.
+
+% ── 3. Methods ────────────────────────────────────────────────────────────────
+\section{Methods}
+
+\subsection{Network Models}
+\begin{itemize}
+  \item \textbf{ER}: $G(n,p)$, $p=\langle k\rangle/(n-1)$;
+        $\langle k\rangle\in\{2,2.5,3,4,5,6,8,10\}$.
+  \item \textbf{BA}: Barab\'asi--Albert preferential attachment~\cite{Barabasi1999};
+        $m\in\{1,2,3,4,5,7,10\}$ ($m=1$ is a tree).
+  \item \textbf{WS}: Watts--Strogatz~\cite{Watts1998}, $k_{\rm WS}=6$;
+        $\beta\in\{0.01,0.05,0.1,0.2,0.4,0.6,0.8,1.0\}$
+        ($\beta=1$ approximates ER).
+\end{itemize}
+All main-sweep runs use $N=1000$ and 100 independent realizations per condition.
+
+\subsection{Attack Protocol}
+Two independent attackers (BC-ranker, EC-ranker) each perform a
+\emph{batched adaptive attack}: centralities are recomputed every $k=10$
+removals.
+At each step we record $S(f)$, $\chi(f)$, and $\tau(f)$ (Kendall $\tau$
+between BC and EC on the residual graph), separately per attacker.
+The threshold $f_c$ is estimated from $\bar\chi(f)$ via Eq.~(\ref{eq:fc}).
+
+\subsection{Finite-Size Scaling}
+For one mid-$\tau$ condition per model (ER $\langle k\rangle=4$, BA $m=3$,
+WS $\beta=0.2$), we repeat the sweep at $N\in\{500,1000,2000\}$ with
+100 realizations.
+
+% ── 4. Results ────────────────────────────────────────────────────────────────
+\section{Results}
+
+\subsection{Calibration}
+Fig.~\ref{fig:network_viz} shows representative network visualizations with
+nodes colored by BC and EC for high-$\tau$ and low-$\tau$ examples.
+Fig.~\ref{fig:rank_scatter} shows BC rank vs.\ EC rank scatter plots,
+confirming that the sweep spans a wide range of centrality disagreement.
+
+\subsection{Gap Tracks Divergence}
+Fig.~\ref{fig:attack_curves} shows representative attack curves;
+$\Delta f$ is visible from the separation between the BC and EC susceptibility
+peaks.
+Fig.~\ref{fig:main_scatter} shows the main result: $\Delta f$
+vs.\ $\tau_{\rm initial}$ for all conditions.
+Topology determines both sign and magnitude: BA networks consistently show
+$\Delta f>0$ (BC faster), while WS networks exhibit smaller, less systematic
+gaps.
+
+\subsection{Asymmetric $\tau$ Evolution Under Attack}
+Fig.~\ref{fig:tau_traj} shows $\tau_{\rm BC}(f)$ and $\tau_{\rm EC}(f)$.
+Both begin at $\tau_{\rm initial}$ on the same intact network, but diverge
+mid-collapse.
+The maximum separation between the two trajectories precedes the first
+attacker's threshold $f_c^{(\rm first)}$ by a topology-dependent lag,
+mechanistically explaining why $\Delta f\neq 0$.
+
+\subsection{$\tau$ Divergence Rate as Early-Warning Signal}
+Fig.~\ref{fig:tau_rate} shows $\delta(f)=d[\tau_{\rm BC}(f)-\tau_{\rm EC}(f)]/df$.
+The peak of $|\delta(f)|$ occurs at $f<f_c^{(\rm first)}$ for BA and WS
+models, providing a structural precursor to collapse.
+
+\subsection{Finite-Size Scaling}
+Fig.~\ref{fig:fss} shows $f_c$ vs.\ $N$; estimates converge within $\pm0.02$
+by $N=1000$, validating main-sweep results.
+
+% ── 5. Discussion ─────────────────────────────────────────────────────────────
+\section{Discussion}
+
+\textit{Topology-dependent attacker dominance.}
+In BA networks, high-degree hubs are simultaneously high-BC and high-EC;
+BC identifies them more reliably at moderate $\tau$, yielding $\Delta f>0$.
+In WS networks, the locally lattice-like structure reduces degree heterogeneity,
+making BC and EC more similar and $|\Delta f|$ smaller.
+
+\textit{$\delta(f)$ as structural early warning.}
+The divergence rate $\delta(f)$ peaks \emph{before} the first threshold,
+offering a measurable precursor that does not require knowing $f_c$ in advance.
+If $\tau_{\rm BC}(f)$ and $\tau_{\rm EC}(f)$ are observable online, a rising
+$|\delta|$ signal indicates approaching collapse.
+
+\textit{Defense implications.}
+Networks with maximally aligned BC and EC rankings (high $\tau$) have smaller
+attack surfaces.
+Engineering high $\tau$---e.g., by reducing degree heterogeneity---may reduce
+vulnerability to centrality-based attacks.
+
+% ── 6. Conclusion ─────────────────────────────────────────────────────────────
+\section{Conclusion}
+
+We have defined the centrality divergence attack surface~(CDAS) as the signed
+percolation threshold gap $\Delta f$ induced by disagreement between BC and EC.
+Empirically, $\Delta f$ correlates with $\tau_{\rm initial}$, with sign and
+magnitude determined by network topology.
+The asymmetric evolution of $\tau$ under the two attack strategies provides a
+mechanistic explanation, and $\delta(f)$ constitutes a topology-sensitive
+early-warning signal of network collapse.
+
+% ── Figures ───────────────────────────────────────────────────────────────────
+
+\begin{figure}[t]
+  \includegraphics[width=\columnwidth]{fig1_network_viz}
+  \caption{High-$\tau$ and low-$\tau$ network examples per model.
+           Top row: nodes colored by BC; bottom row: by EC.
+           Color scale: plasma, normalized per panel.}
+  \label{fig:network_viz}
+\end{figure}
+
+\begin{figure}[t]
+  \includegraphics[width=\columnwidth]{fig2_rank_scatter}
+  \caption{BC rank vs.\ EC rank for representative networks,
+           annotated with Kendall~$\tau$.}
+  \label{fig:rank_scatter}
+\end{figure}
+
+\begin{figure*}[t]
+  \includegraphics[width=\textwidth]{fig3_attack_curves}
+  \caption{Attack curves $S(f)$ and $\chi(f)$ for BC (pink) and EC (cyan) attackers.
+           High-$\tau$ (left column pair) and low-$\tau$ (right column pair) per model.
+           Dashed verticals mark $f_c$; $\Delta f$ annotated in susceptibility panels.}
+  \label{fig:attack_curves}
+\end{figure*}
+
+\begin{figure}[t]
+  \includegraphics[width=\columnwidth]{fig4_main_scatter}
+  \caption{$\Delta f$ vs.\ $\tau_{\rm initial}$ for all conditions,
+           colored by model.
+           Dashed line: $\Delta f=0$.}
+  \label{fig:main_scatter}
+\end{figure}
+
+\begin{figure}[t]
+  \includegraphics[width=\columnwidth]{fig5_tau_trajectories}
+  \caption{$\tau$ evolution under BC (pink) and EC (cyan) attackers.
+           Dashed verticals mark $f_c^{\rm BC}$ and $f_c^{\rm EC}$.}
+  \label{fig:tau_traj}
+\end{figure}
+
+\begin{figure}[t]
+  \includegraphics[width=\columnwidth]{fig6_tau_div_rate}
+  \caption{$\tau$ divergence rate $\delta(f)$ per model.
+           Dotted: peak of $|\delta|$; dashed: $f_c^{(\rm first)}$.}
+  \label{fig:tau_rate}
+\end{figure}
+
+\begin{figure}[t]
+  \includegraphics[width=\columnwidth]{fig7_fss}
+  \caption{Finite-size scaling: $f_c$ vs.\ $N$ for BC (circles) and EC (squares).}
+  \label{fig:fss}
+\end{figure}
+
+% ── References ────────────────────────────────────────────────────────────────
+\begin{thebibliography}{1}
+
+\bibitem{Albert2000}
+R.~Albert, H.~Jeong, and A.-L.~Barab\'asi,
+``Error and attack tolerance of complex networks,''
+\textit{Nature}, vol.~406, pp.~378--382, 2000.
+
+\bibitem{Holme2002}
+P.~Holme, B.~J.~Kim, C.~N.~Yoon, and S.~K.~Han,
+``Attack vulnerability of complex networks,''
+\textit{Phys.\ Rev.\ E}, vol.~65, p.~056109, 2002.
+
+\bibitem{Iyer2013}
+S.~Iyer, T.~Killingback, B.~Sundaram, and Z.~Wang,
+``Attack robustness and centrality of complex networks,''
+\textit{PLOS ONE}, vol.~8, no.~4, p.~e59613, 2013.
+
+\bibitem{MolloyReed1995}
+M.~Molloy and B.~Reed,
+``A critical point for random graphs with a given degree sequence,''
+\textit{Random Struct.\ Algorithms}, vol.~6, no.~2--3, pp.~161--179, 1995.
+
+\bibitem{Barabasi1999}
+A.-L.~Barab\'asi and R.~Albert,
+``Emergence of scaling in random networks,''
+\textit{Science}, vol.~286, no.~5439, pp.~509--512, 1999.
+
+\bibitem{Watts1998}
+D.~J.~Watts and S.~H.~Strogatz,
+``Collective dynamics of small-world networks,''
+\textit{Nature}, vol.~393, pp.~440--442, 1998.
+
+\end{thebibliography}
+
+\end{document}
