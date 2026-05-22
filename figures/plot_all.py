@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate all 7 paper figures from data/. Run after sweep completes."""
+"""Generate all paper figures from data/. Run after sweep completes."""
 import os
 import sys
 import numpy as np
@@ -135,8 +135,9 @@ def fig3():
             chi_ec, fc_ec = chi_mean_and_fc(data, 'ec')
             ax_s = axes[row, ci * 2]
             ax_c = axes[row, ci * 2 + 1]
-            ax_s.plot(f, data['s_bc'].mean(0), color=BC_COLOR, lw=1, label='BC')
-            ax_s.plot(f, data['s_ec'].mean(0), color=EC_COLOR, lw=1, label='EC')
+            ax_s.plot(f, data['s_bc'].mean(0),   color=BC_COLOR,  lw=1,   label='BC')
+            ax_s.plot(f, data['s_ec'].mean(0),   color=EC_COLOR,  lw=1,   label='EC')
+            ax_s.plot(f, data['s_rand'].mean(0), color='#888888', lw=0.8, ls='--', label='rand')
             ax_s.set_title(label, fontsize=5)
             ax_s.set_xlabel('f', fontsize=5)
             ax_s.set_ylabel('S/N', fontsize=5)
@@ -188,76 +189,138 @@ def fig4():
     print('Saved fig4')
 
 
-# ── Fig 5: τ trajectories ─────────────────────────────────────────────────────
+# ── Fig A: EC score variance collapse ─────────────────────────────────────────
 
-def fig5():
+def fig_a():
+    EPS = 0.01
+    per_model = {
+        'er': [(2,    r'ER $\langle k\rangle$=2'),  (10,  r'ER $\langle k\rangle$=10')],
+        'ba': [(1,    'BA m=1'),                      (10,  'BA m=10')],
+        'ws': [(0.01, r'WS $\beta$=0.01'),            (1.0, r'WS $\beta$=1.0')],
+    }
     fig, axes = plt.subplots(1, 3, figsize=(COL_W * 2, 2.2))
-    for ax, (model, pv, label) in zip(axes, [
-        ('er', 4.0, r'ER $\langle k\rangle$=4'),
-        ('ba', 3,   'BA m=3'),
-        ('ws', 0.2, r'WS $\beta$=0.2'),
-    ]):
-        data = load(model, pv, 1000)
-        f = data['f_values']
-        _, fc_bc = chi_mean_and_fc(data, 'bc')
-        _, fc_ec = chi_mean_and_fc(data, 'ec')
-        ax.plot(f, data['tau_bc'].mean(0), color=BC_COLOR, lw=1.1,
-                label=r'$\tau_{\rm BC}(f)$')
-        ax.plot(f, data['tau_ec'].mean(0), color=EC_COLOR, lw=1.1,
-                label=r'$\tau_{\rm EC}(f)$')
-        ax.axvline(fc_bc, color=BC_COLOR, ls='--', lw=0.8)
-        ax.axvline(fc_ec, color=EC_COLOR, ls='--', lw=0.8)
+    for ax, (model, conds) in zip(axes, per_model.items()):
+        for pv, label in conds:
+            try:
+                data = load(model, pv, 1000)
+            except FileNotFoundError:
+                continue
+            f = data['f_values']
+            v = data['var_ec'].mean(axis=0)
+            ax.plot(f, v / (v[0] + 1e-12), lw=1.2, label=label)
+        ax.axhline(EPS, color='k', ls=':', lw=0.8, label=f'ε={EPS}')
         ax.set_xlabel('f', fontsize=7)
-        ax.set_ylabel(r'$\tau$', fontsize=7)
-        ax.set_title(label, fontsize=7)
+        ax.set_ylabel('Relative EC variance', fontsize=7)
+        ax.set_title(model.upper(), fontsize=7)
         ax.legend(fontsize=5)
         ax.tick_params(labelsize=5)
     fig.tight_layout()
-    fig.savefig(f'{FIG_DIR}/fig5_tau_trajectories.pdf', bbox_inches='tight')
+    fig.savefig(f'{FIG_DIR}/fig_a_ec_variance.pdf', bbox_inches='tight')
     plt.close(fig)
-    print('Saved fig5')
+    print('Saved fig_a')
 
 
-# ── Fig 6: τ divergence rate ──────────────────────────────────────────────────
+# ── Fig B: f* vs. structural parameter ────────────────────────────────────────
 
-def fig6():
+def fig_b():
+    import csv as _csv
+    try:
+        rows = list(_csv.DictReader(open('results/f_star.csv')))
+    except FileNotFoundError:
+        print('fig_b skipped: results/f_star.csv not found — run scripts/extract_f_star.py first')
+        return
     fig, axes = plt.subplots(1, 3, figsize=(COL_W * 2, 2.2))
-    for ax, (model, pv, label) in zip(axes, [
-        ('er', 4.0, r'ER $\langle k\rangle$=4'),
-        ('ba', 3,   'BA m=3'),
-        ('ws', 0.2, r'WS $\beta$=0.2'),
-    ]):
-        data = load(model, pv, 1000)
-        f = data['f_values']
-        diff = data['tau_bc'].mean(0) - data['tau_ec'].mean(0)
-        n = len(diff)
-        win = min(11, n - 1 if n % 2 == 0 else n)
-        if win < 3:
-            smooth = diff
-        else:
-            if win % 2 == 0:
-                win -= 1
-            smooth = savgol_filter(diff, win, 3)
-        df = f[1] - f[0] if len(f) > 1 else 1.0
-        deriv = np.gradient(smooth, df)
-        _, fc_bc = chi_mean_and_fc(data, 'bc')
-        _, fc_ec = chi_mean_and_fc(data, 'ec')
-        fc_first = min(fc_bc, fc_ec)
-        f_peak = f[np.argmax(np.abs(deriv))]
-        ax.plot(f, deriv, color=COLORS[model], lw=1.1)
-        ax.axvline(f_peak, color='k', ls=':', lw=0.8,
-                   label=f'peak f={f_peak:.2f}')
-        ax.axvline(fc_first, color='gray', ls='--', lw=0.8,
-                   label=r'$f_c$=' + f'{fc_first:.2f}')
-        ax.set_xlabel('f', fontsize=7)
-        ax.set_ylabel(r'$\delta(f)$', fontsize=7)
-        ax.set_title(label, fontsize=7)
-        ax.legend(fontsize=5)
+    xlabels = {'er': r'$\langle k\rangle$', 'ba': 'm', 'ws': r'$\beta$'}
+    for ax, model in zip(axes, ['er', 'ba', 'ws']):
+        pts = sorted(
+            (float(r['param']), float(r['f_star_mean']), float(r['f_star_std']))
+            for r in rows if r['model'] == model
+        )
+        if not pts:
+            continue
+        xs, ys, errs = zip(*pts)
+        ax.errorbar(xs, ys, yerr=errs, fmt='o-', color=COLORS[model],
+                    lw=1, ms=4, capsize=2, elinewidth=0.7)
+        ax.set_xlabel(xlabels[model], fontsize=7)
+        ax.set_ylabel(r'$f^*$', fontsize=7)
+        ax.set_title(model.upper(), fontsize=7)
         ax.tick_params(labelsize=5)
     fig.tight_layout()
-    fig.savefig(f'{FIG_DIR}/fig6_tau_div_rate.pdf', bbox_inches='tight')
+    fig.savefig(f'{FIG_DIR}/fig_b_f_star.pdf', bbox_inches='tight')
     plt.close(fig)
-    print('Saved fig6')
+    print('Saved fig_b')
+
+
+# ── Fig C: BC vs EC vs rand S(f) with f* vertical line ───────────────────────
+
+def fig_c():
+    import csv as _csv
+    try:
+        f_star_map = {(r['model'], r['param']): float(r['f_star_mean'])
+                      for r in _csv.DictReader(open('results/f_star.csv'))}
+    except FileNotFoundError:
+        print('fig_c skipped: results/f_star.csv not found — run scripts/extract_f_star.py first')
+        return
+    pairs = {
+        'er': [(2,    r'ER $\langle k\rangle$=2'),  (10,  r'ER $\langle k\rangle$=10')],
+        'ba': [(1,    'BA m=1'),                      (10,  'BA m=10')],
+        'ws': [(0.01, r'WS $\beta$=0.01'),            (1.0, r'WS $\beta$=1.0')],
+    }
+    fig, axes = plt.subplots(3, 2, figsize=(COL_W * 2, 5))
+    for row, (model, conds) in enumerate(pairs.items()):
+        for col, (pv, label) in enumerate(conds):
+            ax = axes[row, col]
+            try:
+                data = load(model, pv, 1000)
+            except FileNotFoundError:
+                continue
+            f = data['f_values']
+            ax.plot(f, data['s_bc'].mean(0),   color=BC_COLOR,  lw=1.2, label='BC')
+            ax.plot(f, data['s_ec'].mean(0),   color=EC_COLOR,  lw=1.2, label='EC')
+            ax.plot(f, data['s_rand'].mean(0), color='#888888', lw=1.0, ls='--', label='rand')
+            fstar = f_star_map.get((model, str(pv)))
+            if fstar is not None:
+                ax.axvline(fstar, color='k', ls=':', lw=0.8, label=f'f*={fstar:.2f}')
+            ax.set_title(label, fontsize=5)
+            ax.set_xlabel('f', fontsize=5)
+            ax.set_ylabel('S/N', fontsize=5)
+            ax.legend(fontsize=4)
+            ax.tick_params(labelsize=4)
+    fig.tight_layout()
+    fig.savefig(f'{FIG_DIR}/fig_c_ec_vs_rand.pdf', bbox_inches='tight')
+    plt.close(fig)
+    print('Saved fig_c')
+
+
+# ── Fig D: Predicted vs observed Δf regression ────────────────────────────────
+
+def fig_d():
+    import csv as _csv
+    try:
+        rows = list(_csv.DictReader(open('results/regression.csv')))
+    except FileNotFoundError:
+        print('fig_d skipped: results/regression.csv not found — run scripts/regression_delta_f.py first')
+        return
+    fig, ax = plt.subplots(figsize=(COL_W, 2.8))
+    for model in ['er', 'ba', 'ws']:
+        pts = [(float(r['delta_f']), float(r['predicted']))
+               for r in rows if r['model'] == model]
+        if not pts:
+            continue
+        obs, pred = zip(*pts)
+        r2 = float(next(r['r2'] for r in rows if r['model'] == model))
+        ax.scatter(obs, pred, color=COLORS[model], label=f'{model.upper()} R²={r2:.2f}',
+                   s=40, edgecolors='k', linewidths=0.4, zorder=3)
+    lims = [min(ax.get_xlim()[0], ax.get_ylim()[0]),
+            max(ax.get_xlim()[1], ax.get_ylim()[1])]
+    ax.plot(lims, lims, 'k--', lw=0.8)
+    ax.set_xlabel(r'Observed $\Delta f$', fontsize=9)
+    ax.set_ylabel(r'Predicted $\Delta f$', fontsize=9)
+    ax.legend(fontsize=7)
+    fig.tight_layout()
+    fig.savefig(f'{FIG_DIR}/fig_d_regression.pdf', bbox_inches='tight')
+    plt.close(fig)
+    print('Saved fig_d')
 
 
 # ── Fig 7: FSS ────────────────────────────────────────────────────────────────
@@ -298,7 +361,9 @@ if __name__ == '__main__':
     fig2()
     fig3()
     fig4()
-    fig5()
-    fig6()
+    fig_a()
+    fig_b()
+    fig_c()
+    fig_d()
     fig7()
     print(f'\nAll figures saved to {FIG_DIR}/')
