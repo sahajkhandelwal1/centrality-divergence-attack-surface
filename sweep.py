@@ -15,6 +15,7 @@ conditions in parallel with joblib and save one .npz per condition.
 import os
 import numpy as np
 from joblib import Parallel, delayed
+from tqdm import tqdm
 
 from src.networks import make_er, make_ba, make_ws, WS_PARAMS
 from src.attack import attack
@@ -26,7 +27,6 @@ def _one_realization(model: str, param_val, n: int, idx: int,
                      batch_size: int) -> dict:
     """Generate one graph and run both BC and EC attacks on it."""
     import random as _random
-    import igraph as ig
 
     seed = abs(hash((model, str(param_val), n, idx))) % (2 ** 31)
     _random.seed(seed)
@@ -56,25 +56,35 @@ def run_sweep(model: str, param_vals: list, n: int, n_real: int,
     """
     Run the sweep over param_vals for one model at one network size.
     Skips conditions whose .npz already exists (safe to re-run after interruption).
+    Progress bars update per completed realization within each condition.
     """
     os.makedirs(DATA_DIR, exist_ok=True)
+
+    pending = [pv for pv in param_vals
+               if not os.path.exists(os.path.join(DATA_DIR, f'{model}_param{pv}_N{n}.npz'))]
 
     for pv in param_vals:
         out = os.path.join(DATA_DIR, f'{model}_param{pv}_N{n}.npz')
         if os.path.exists(out):
-            print(f'  Skip (exists): {out}')
+            tqdm.write(f'  Skip (exists): {out}')
             continue
 
-        print(f'  Running {model} param={pv} N={n} x{n_real} realizations ...')
-        results = Parallel(n_jobs=n_jobs)(
-            delayed(_one_realization)(model, pv, n, r, batch_size)
-            for r in range(n_real)
-        )
+        desc = f'{model} param={pv} N={n}'
+        results = list(tqdm(
+            Parallel(n_jobs=n_jobs, return_as='generator_unordered')(
+                delayed(_one_realization)(model, pv, n, r, batch_size)
+                for r in range(n_real)
+            ),
+            total=n_real,
+            desc=desc,
+            unit='real',
+            ncols=88,
+            bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]',
+        ))
 
-        # Stack realization arrays; f_values is identical across realizations
         arrays = {k: np.stack([res[k] for res in results]) for k in results[0]}
-        arrays['f_values'] = results[0]['f_values']       # shape (n_rec,)
-        arrays['tau_initial'] = arrays['tau_bc'][:, 0]    # shape (n_real,)
+        arrays['f_values'] = results[0]['f_values']
+        arrays['tau_initial'] = arrays['tau_bc'][:, 0]
 
         np.savez_compressed(out, **arrays)
-        print(f'    Saved: {out}')
+        tqdm.write(f'  Saved: {out}')
