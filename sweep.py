@@ -1,5 +1,5 @@
 """
-Sweep orchestration: run BC and EC attacks across all (model, param, N)
+Sweep orchestration: run BC, EC, and random attacks across all (model, param, N)
 conditions in parallel with joblib and save one .npz per condition.
 
 .npz schema per condition (n_real realizations, n_rec = N//batch_size + 1 steps):
@@ -9,6 +9,9 @@ conditions in parallel with joblib and save one .npz per condition.
   s_ec        (n_real, n_rec)
   chi_ec      (n_real, n_rec)
   tau_ec      (n_real, n_rec)
+  var_ec      (n_real, n_rec)  variance of EC score vector at each step
+  s_rand      (n_real, n_rec)  giant fraction under random removal
+  chi_rand    (n_real, n_rec)  susceptibility under random removal
   f_values    (n_rec,)         removal fractions (shared; index 0 = intact network)
   tau_initial (n_real,)        tau on intact graph (= tau_bc[:, 0])
 """
@@ -41,12 +44,15 @@ def _one_realization(model: str, param_val, n: int, idx: int,
     else:
         raise ValueError(f"Unknown model: {model!r}")
 
-    r_bc = attack(g.copy(), attacker='bc', batch_size=batch_size)
-    r_ec = attack(g.copy(), attacker='ec', batch_size=batch_size)
+    r_bc   = attack(g.copy(), attacker='bc',   batch_size=batch_size)
+    r_ec   = attack(g.copy(), attacker='ec',   batch_size=batch_size)
+    r_rand = attack(g.copy(), attacker='rand', batch_size=batch_size)
 
     return {
-        's_bc':   r_bc['s'],   'chi_bc': r_bc['chi'], 'tau_bc': r_bc['tau'],
-        's_ec':   r_ec['s'],   'chi_ec': r_ec['chi'], 'tau_ec': r_ec['tau'],
+        's_bc':    r_bc['s'],    'chi_bc':   r_bc['chi'],  'tau_bc':  r_bc['tau'],
+        's_ec':    r_ec['s'],    'chi_ec':   r_ec['chi'],  'tau_ec':  r_ec['tau'],
+        'var_ec':  r_ec['var_ec'],
+        's_rand':  r_rand['s'],  'chi_rand': r_rand['chi'],
         'f_values': r_bc['f_values'],
     }
 
