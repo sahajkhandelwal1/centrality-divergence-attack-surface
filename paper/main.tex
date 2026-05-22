@@ -1,5 +1,6 @@
 \documentclass[journal]{IEEEtran}
 \usepackage{amsmath,amssymb,graphicx,booktabs,hyperref,cite}
+\usepackage{float}   % [H] placement specifier
 \graphicspath{{../figures/}}
 
 \begin{document}
@@ -190,14 +191,27 @@ with 100 realizations each.
 \section{Results}
 
 \subsection{Network Visualizations and Rank Agreement}
-Fig.~\ref{fig:network_viz} shows representative network visualizations with
+
+Figure~\ref{fig:network_viz} shows representative network visualizations with
 nodes colored by BC (top row) and EC (bottom row) for high- and low-connectivity
 examples of each model.
 At high connectivity (ER $\langle k\rangle=8$, BA $m=5$, WS $\beta=0.8$),
 the two centrality maps are visually similar; at low connectivity they diverge,
 with BC highlighting structural bridge nodes that EC does not identify.
 
-Fig.~\ref{fig:rank_scatter} shows BC rank vs.\ EC rank scatter plots for
+\begin{figure}[H]
+  \includegraphics[width=\columnwidth]{fig1_network_viz}
+  \caption{Network visualizations for high- and low-connectivity examples of
+           each model~($N=100$).
+           Top row: nodes colored by BC; bottom row: by EC.
+           Color scale: plasma, normalized per panel.
+           At low connectivity~(ER $\langle k\rangle=2.5$, BA $m=1$,
+           WS $\beta=0.01$), BC identifies bridge and hub nodes that EC fails
+           to differentiate.}
+  \label{fig:network_viz}
+\end{figure}
+
+Figure~\ref{fig:rank_scatter} shows BC rank vs.\ EC rank scatter plots for
 representative intact $N=200$ networks.
 For ER, BC and EC rankings are well correlated because both are
 degree-dominated in this regime.
@@ -205,8 +219,18 @@ For BA, the hub structure causes a strong but imperfect correlation.
 For WS at $\beta=0.2$, the near-regular degree distribution makes EC nearly
 uniform while BC varies, yielding lower rank correlation.
 
+\begin{figure}[H]
+  \includegraphics[width=\columnwidth]{fig2_rank_scatter}
+  \caption{BC rank vs.\ EC rank for representative intact networks~($N=200$),
+           annotated with Kendall~$\tau$.
+           Correlation is high for ER and BA but lower for WS~($\beta=0.2$)
+           where degree homogeneity compresses EC scores.}
+  \label{fig:rank_scatter}
+\end{figure}
+
 \subsection{BC is Universally More Effective}
-Fig.~\ref{fig:attack_curves} shows representative attack curves $S(f)$ and
+
+Figure~\ref{fig:attack_curves} shows representative attack curves $S(f)$ and
 $\chi(f)$ for both attackers.
 In every condition, the BC-attacker's susceptibility peak occurs at a smaller
 $f$ than the EC-attacker's, confirming $\Delta f > 0$ universally.
@@ -219,8 +243,21 @@ $f_c^{\rm EC}=0.98$, yielding $\Delta f = 0.97$.
 For ER $\langle k\rangle=10$, the gap narrows to $\Delta f = 0.33$ as the
 dense network makes EC more reliable.
 
+\begin{figure*}[!t]
+  \includegraphics[width=\textwidth]{fig3_attack_curves}
+  \caption{Attack curves $S(f)$ (giant fraction) and $\chi(f)$ (susceptibility)
+           for BC (pink) and EC (cyan) attackers at $N=1000$.
+           Left pair per model: high connectivity; right pair: low connectivity
+           (where EC degrades).
+           Dashed verticals mark $f_c$; $\Delta f$ is annotated in
+           susceptibility panels.
+           BC curves collapse earlier in all conditions.}
+  \label{fig:attack_curves}
+\end{figure*}
+
 \subsection{Topology-Dependent Gap}
-Fig.~\ref{fig:main_scatter} shows the main result: all 23 conditions have
+
+Figure~\ref{fig:main_scatter} shows the main result: all 23 conditions have
 initial Kendall $\tau\approx 1$ between BC and EC rankings on the intact
 network, yet $\Delta f$ spans a wide range $[0.33,0.97]$ depending on model
 type and parameter.
@@ -240,23 +277,60 @@ The topology dependence follows a clear pattern:
         or WS because ER degree heterogeneity is limited.
 \end{itemize}
 
+\begin{figure}[H]
+  \includegraphics[width=\columnwidth]{fig4_main_scatter}
+  \caption{$\Delta f$ vs.\ initial Kendall $\tau_{\rm initial}$ for all
+           23 conditions at $N=1000$, colored by model.
+           All points cluster near $\tau=1$ regardless of model or parameter,
+           yet $\Delta f$ spans $[0.33,0.97]$.
+           Initial rank agreement does not predict attack effectiveness gap.
+           Dashed line: $\Delta f=0$.}
+  \label{fig:main_scatter}
+\end{figure}
+
 \subsection{Rank Agreement is Maintained Throughout the Attack}
-Fig.~\ref{fig:tau_traj} shows $\tau_{\rm BC}(f)$ (Kendall $\tau$ between BC
+
+Figure~\ref{fig:tau_traj} shows $\tau_{\rm BC}(f)$ (Kendall $\tau$ between BC
 and EC measured during the BC attack) and $\tau_{\rm EC}(f)$ (measured during
 the EC attack) as functions of $f$.
 Both trajectories remain near $\tau=1$ throughout the attack for all three
 model conditions shown, confirming that the gap $\Delta f$ is not caused by
 rank divergence \emph{during} the attack.
 
-Fig.~\ref{fig:tau_rate} shows the derivative
+\begin{figure}[H]
+  \includegraphics[width=\columnwidth]{fig5_tau_trajectories}
+  \caption{$\tau$ between BC and EC rankings on the residual graph, measured
+           during BC attack (pink) and EC attack (cyan), as a function of
+           removal fraction $f$.
+           Both trajectories remain near $\tau=1$ throughout, confirming that
+           rank agreement is maintained during the attack.
+           Dashed verticals mark $f_c^{\rm BC}$ and $f_c^{\rm EC}$.}
+  \label{fig:tau_traj}
+\end{figure}
+
+Figure~\ref{fig:tau_rate} shows the derivative
 $\delta(f)=d[\tau_{\rm BC}(f)-\tau_{\rm EC}(f)]/df$, which is near zero
 throughout, consistent with the flat trajectories in Fig.~\ref{fig:tau_traj}.
 The mechanism driving the gap is therefore the degradation of EC as a
 \emph{ranking estimator} on sparse residual graphs, not a change in the
 relative ordering of nodes.
 
+\begin{figure}[H]
+  \includegraphics[width=\columnwidth]{fig6_tau_div_rate}
+  \caption{$\tau$ divergence rate
+           $\delta(f)=d[\tau_{\rm BC}(f)-\tau_{\rm EC}(f)]/df$
+           per model.
+           Near-zero values throughout confirm that the two attack trajectories
+           maintain similar Kendall $\tau$ profiles;
+           the gap $\Delta f$ does not arise from rank divergence during the
+           attack.
+           Dotted: peak of $|\delta|$; dashed: $f_c^{(\rm first)}$.}
+  \label{fig:tau_rate}
+\end{figure}
+
 \subsection{Finite-Size Scaling}
-Fig.~\ref{fig:fss} shows $f_c$ vs.\ $N$ for both attackers.
+
+Figure~\ref{fig:fss} shows $f_c$ vs.\ $N$ for both attackers.
 For ER $\langle k\rangle=4$: $f_c^{\rm BC}$ varies from $0.30$ ($N=500$) to
 $0.27$ ($N=1000$) to $0.26$ ($N=2000$); $f_c^{\rm EC}$ varies from $0.72$ to
 $0.70$ to $0.71$.
@@ -266,6 +340,16 @@ For WS $\beta=0.2$: $f_c^{\rm BC}$ decreases from $0.42$ to $0.40$;
 $f_c^{\rm EC}$ increases from $0.94$ to $0.98$.
 In all cases, variation across $N\in\{500,1000,2000\}$ is within $\pm 0.03$,
 validating main-sweep results at $N=1000$.
+
+\begin{figure}[H]
+  \includegraphics[width=\columnwidth]{fig7_fss}
+  \caption{Finite-size scaling: $f_c$ vs.\ $N\in\{500,1000,2000\}$ for
+           BC-attacker~(circles) and EC-attacker~(squares) at mid-connectivity
+           conditions~(ER $\langle k\rangle=4$, BA $m=3$, WS $\beta=0.2$).
+           All estimates vary by less than $\pm 0.03$ across system sizes,
+           validating $N=1000$ as sufficient.}
+  \label{fig:fss}
+\end{figure}
 
 % ── 5. Discussion ─────────────────────────────────────────────────────────────
 \section{Discussion}
@@ -324,86 +408,6 @@ dismantled, EC loses its ability to rank nodes effectively while BC remains
 robust.
 Finite-size scaling confirms that $N=1000$ is sufficient for stable threshold
 estimates.
-
-% ── Figures ───────────────────────────────────────────────────────────────────
-
-\begin{figure}[t]
-  \includegraphics[width=\columnwidth]{fig1_network_viz}
-  \caption{Network visualizations for high- and low-connectivity examples of
-           each model~($N=100$).
-           Top row: nodes colored by BC; bottom row: by EC.
-           Color scale: plasma, normalized per panel.
-           At low connectivity~(ER $\langle k\rangle=2.5$, BA $m=1$,
-           WS $\beta=0.01$), BC identifies bridge and hub nodes that EC fails
-           to differentiate.}
-  \label{fig:network_viz}
-\end{figure}
-
-\begin{figure}[t]
-  \includegraphics[width=\columnwidth]{fig2_rank_scatter}
-  \caption{BC rank vs.\ EC rank for representative intact networks~($N=200$),
-           annotated with Kendall~$\tau$.
-           Correlation is high for ER and BA but lower for WS~($\beta=0.2$)
-           where degree homogeneity compresses EC scores.}
-  \label{fig:rank_scatter}
-\end{figure}
-
-\begin{figure*}[t]
-  \includegraphics[width=\textwidth]{fig3_attack_curves}
-  \caption{Attack curves $S(f)$ (giant fraction) and $\chi(f)$ (susceptibility)
-           for BC (pink) and EC (cyan) attackers at $N=1000$.
-           Left pair per model: high connectivity~(high $\tau$);
-           right pair: low connectivity~(low $\tau$, where EC degrades).
-           Dashed verticals mark $f_c$; $\Delta f$ is annotated in
-           susceptibility panels.
-           BC curves collapse earlier in all conditions.}
-  \label{fig:attack_curves}
-\end{figure*}
-
-\begin{figure}[t]
-  \includegraphics[width=\columnwidth]{fig4_main_scatter}
-  \caption{$\Delta f$ vs.\ initial Kendall $\tau_{\rm initial}$ for all
-           23 conditions at $N=1000$, colored by model.
-           All points cluster near $\tau=1$ regardless of model or parameter,
-           yet $\Delta f$ spans $[0.33,0.97]$.
-           Initial rank agreement does not predict attack effectiveness gap.
-           Dashed line: $\Delta f=0$.}
-  \label{fig:main_scatter}
-\end{figure}
-
-\begin{figure}[t]
-  \includegraphics[width=\columnwidth]{fig5_tau_trajectories}
-  \caption{$\tau$ between BC and EC rankings on the residual graph, measured
-           during BC attack (pink) and EC attack (cyan), as a function of
-           removal fraction $f$.
-           Both trajectories remain near $\tau=1$ throughout, confirming that
-           rank agreement is maintained during the attack.
-           Dashed verticals mark $f_c^{\rm BC}$ and $f_c^{\rm EC}$.}
-  \label{fig:tau_traj}
-\end{figure}
-
-\begin{figure}[t]
-  \includegraphics[width=\columnwidth]{fig6_tau_div_rate}
-  \caption{$\tau$ divergence rate
-           $\delta(f)=d[\tau_{\rm BC}(f)-\tau_{\rm EC}(f)]/df$
-           per model.
-           Near-zero values throughout confirm that the two attack trajectories
-           maintain similar Kendall $\tau$ profiles;
-           the gap $\Delta f$ does not arise from rank divergence during the
-           attack.
-           Dotted: peak of $|\delta|$; dashed: $f_c^{(\rm first)}$.}
-  \label{fig:tau_rate}
-\end{figure}
-
-\begin{figure}[t]
-  \includegraphics[width=\columnwidth]{fig7_fss}
-  \caption{Finite-size scaling: $f_c$ vs.\ $N\in\{500,1000,2000\}$ for
-           BC-attacker~(circles) and EC-attacker~(squares) at mid-connectivity
-           conditions~(ER $\langle k\rangle=4$, BA $m=3$, WS $\beta=0.2$).
-           All estimates vary by less than $\pm 0.03$ across system sizes,
-           validating $N=1000$ as sufficient.}
-  \label{fig:fss}
-\end{figure}
 
 % ── References ────────────────────────────────────────────────────────────────
 \begin{thebibliography}{1}
