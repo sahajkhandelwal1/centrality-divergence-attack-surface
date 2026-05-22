@@ -45,3 +45,29 @@ def test_attack_unknown_attacker_raises():
     g = ig.Graph.Erdos_Renyi(n=50, p=0.2)
     with pytest.raises(ValueError):
         attack(g, attacker='random')
+
+
+def test_attack_rand_output_shape():
+    g = ig.Graph.Erdos_Renyi(n=100, p=0.1)
+    r = attack(g, attacker='rand', batch_size=10)
+    assert r['s'].shape == (11,)
+    assert r['f_values'].shape == (11,)
+
+
+def test_attack_ec_has_var_ec():
+    g = ig.Graph.Barabasi(n=100, m=3)
+    r = attack(g, attacker='ec', batch_size=10)
+    assert 'var_ec' in r
+    assert r['var_ec'].shape == r['s'].shape
+
+
+def test_attack_bc_has_no_var_ec():
+    g = ig.Graph.Erdos_Renyi(n=100, p=0.1)
+    r = attack(g, attacker='bc', batch_size=10)
+    assert 'var_ec' not in r
+
+
+def test_attack_rand_does_not_raise():
+    g = ig.Graph.Erdos_Renyi(n=50, p=0.2)
+    r = attack(g, attacker='rand', batch_size=10)
+    assert r['s'][0] > 0
