@@ -10,7 +10,7 @@ def _centrality_scores(g: ig.Graph, attacker: str) -> np.ndarray:
         if g.ecount() == 0:
             return np.zeros(g.vcount())
         try:
-            return np.array(g.eigenvector_centrality(directed=False, scale=True))
+            return np.array(g.eigenvector_centrality(scale=True))
         except ig.InternalError:
             return np.zeros(g.vcount())
     else:

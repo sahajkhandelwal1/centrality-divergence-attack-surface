@@ -28,7 +28,7 @@ g = make_ba(n=150, m=3, seed=SEED)
 # ── centralities ──────────────────────────────────────────────────────────────
 bc = np.array(g.betweenness(directed=False))
 try:
-    ec = np.array(g.eigenvector_centrality(directed=False, scale=True))
+    ec = np.array(g.eigenvector_centrality(scale=True))
 except ig.InternalError:
     ec = np.ones(g.vcount())
 

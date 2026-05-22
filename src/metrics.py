@@ -18,7 +18,7 @@ def kendall_tau_centralities(g: ig.Graph) -> float:
         return 1.0
     bc = np.array(g.betweenness(directed=False))
     try:
-        ec = np.array(g.eigenvector_centrality(directed=False, scale=True))
+        ec = np.array(g.eigenvector_centrality(scale=True))
     except ig.InternalError:
         ec = np.ones(g.vcount()) / g.vcount()
     tau, _ = kendalltau(bc, ec)
