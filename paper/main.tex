@@ -60,7 +60,7 @@ therefore controls how quickly the network fragments.
 Betweenness centrality~(BC), measuring the fraction of shortest paths that
 traverse each node, has long been recognized as a powerful attack guide
 because it identifies nodes that bridge otherwise separated
-parts of the network~\cite{girvan2002community}.
+parts of the network~\cite{freeman1977set,girvan2002community}.
 Eigenvector centrality~(EC), measuring recursive influence through
 high-degree neighbors, captures a complementary notion of
 prestige~\cite{bonacich1987power}.
@@ -391,13 +391,14 @@ adjacency matrix and is therefore high for nodes embedded in dense
 cliques~\cite{bonacich1987power}.
 BC, by contrast, counts shortest-path traversals and is therefore high for
 nodes that lie on \emph{cut paths}---paths whose removal would disconnect
-graph components.
-The Cheeger inequality relates the graph's edge conductance (a measure of
-bottleneck width) to the spectral gap $\lambda_2 - \lambda_1$; nodes with
-high BC are precisely those that control this conductance.
-Removing bridge-like nodes collapses the conductance rapidly, fragmenting the
-giant component earlier than removing prestige-rich nodes embedded in
-well-connected clusters.
+graph components~\cite{freeman1977set}.
+The discrete Cheeger inequality~\cite{chung1997spectral} relates the graph's
+edge conductance $h(G) = \min_{S} e(S, \bar{S}) / \min(\mathrm{vol}(S), \mathrm{vol}(\bar{S}))$
+to the spectral gap $\lambda_2$ of the normalized Laplacian via
+$h(G)^2/2 \leq \lambda_2 \leq 2h(G)$.
+Nodes with high BC lie on the cut edges that minimize $h(G)$; removing them
+collapses the conductance rapidly, fragmenting the giant component earlier
+than removing prestige-rich nodes embedded in well-connected clusters.
 
 \subsection{The WS Sweet Spot at \(\beta = 0.05\)}
 
@@ -472,10 +473,20 @@ M.~E.~J. Newman,
 ``The structure and function of complex networks,''
 \emph{SIAM Review}, vol.~45, no.~2, pp.~167--256, 2003.
 
+\bibitem{freeman1977set}
+L.~C. Freeman,
+``A set of measures of centrality based on betweenness,''
+\emph{Sociometry}, vol.~40, no.~1, pp.~35--41, 1977.
+
 \bibitem{girvan2002community}
 M.~Girvan and M.~E.~J. Newman,
 ``Community structure in social and biological networks,''
 \emph{Proc.\ Natl.\ Acad.\ Sci.}, vol.~99, no.~12, pp.~7821--7826, 2002.
+
+\bibitem{chung1997spectral}
+F.~R.~K. Chung,
+\emph{Spectral Graph Theory}.
+Providence, RI: American Mathematical Society, 1997.
 
 \bibitem{bonacich1987power}
 P.~Bonacich,

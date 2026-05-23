@@ -270,25 +270,29 @@ def fig_b():
 # ── Fig 7: FSS ────────────────────────────────────────────────────────────────
 
 def fig7():
+    SIZES = [500, 1000, 2000]
+    # ER N=1000 file uses integer param (er_param4_N1000.npz); FSS files use float (er_param4.0_N*.npz)
+    conditions = [
+        ('er', {500: 4.0, 1000: 4,   2000: 4.0}, r'ER $\langle k\rangle$=4'),
+        ('ba', {500: 3,   1000: 3,    2000: 3},   'BA m=3'),
+        ('ws', {500: 0.2, 1000: 0.2,  2000: 0.2}, r'WS $\beta$=0.2'),
+    ]
     fig, axes = plt.subplots(1, 3, figsize=(COL_W * 2, 2.2))
-    for ax, (model, pv, label) in zip(axes, [
-        ('er', 4.0, r'ER $\langle k\rangle$=4'),
-        ('ba', 3,   'BA m=3'),
-        ('ws', 0.2, r'WS $\beta$=0.2'),
-    ]):
-        sizes = [500, 1000, 2000]
+    for ax, (model, pv_map, label) in zip(axes, conditions):
         fc_bc_list, fc_ec_list = [], []
-        for n in sizes:
+        for n in SIZES:
             try:
-                data = load(model, pv, n)
+                data = load(model, pv_map[n], n)
                 _, fc_bc = chi_mean_and_fc(data, 'bc')
                 _, fc_ec = chi_mean_and_fc(data, 'ec')
             except FileNotFoundError:
                 fc_bc = fc_ec = np.nan
             fc_bc_list.append(fc_bc)
             fc_ec_list.append(fc_ec)
-        ax.plot(sizes, fc_bc_list, 'o-', color=BC_COLOR, lw=1, label='BC')
-        ax.plot(sizes, fc_ec_list, 's-', color=EC_COLOR, lw=1, label='EC')
+        ax.plot(SIZES, fc_bc_list, 'o-', color=BC_COLOR, lw=1, label='BC')
+        ax.plot(SIZES, fc_ec_list, 's-', color=EC_COLOR, lw=1, label='EC')
+        ax.set_xticks(SIZES)
+        ax.set_xlim(300, 2200)
         ax.set_xlabel('N', fontsize=7)
         ax.set_ylabel(r'$f_c$', fontsize=7)
         ax.set_title(label, fontsize=7)
