@@ -22,8 +22,9 @@ eigenvector centrality~(EC) as a targeted-attack strategy across three
 canonical random graph families.
 Defining the \emph{centrality divergence attack surface}~(CDAS) as
 $\Delta f = f_c^{\rm EC} - f_c^{\rm BC}$, the gap between the two
-attackers' percolation thresholds, we measure $\Delta f \in [0.04, 0.38]$
-across 23 network conditions ($N=1000$, 100 realizations each).
+attackers' percolation thresholds, we measure $\Delta f$ ranging from
+$0$ (tree-like BA, $m=1$) to $0.38$ (WS, $\beta=0.05$) across
+23 network conditions ($N=1000$, 100 realizations each).
 We show that the gap is mechanistically explained by a structural distinction:
 BC identifies \emph{bridge nodes}---those controlling inter-cluster flow---while
 EC identifies \emph{prestige nodes}---those embedded in dense, high-degree
@@ -265,8 +266,10 @@ so increasing connectivity does not concentrate bridge structure and the
 BC advantage does not grow with density.
 
 In \textbf{BA} networks, $\Delta f$ is degenerate at $m = 1$ ($\Delta f = 0$)
-and then decreases monotonically from $0.09$ at $m = 2$ to $0.04$ at $m = 10$
-($R^2 = 0.001$, $p = 0.95$, excluding $m = 1$).
+and then decreases from $0.09$ at $m = 2$ to $0.04$ at $m = 10$.
+A linear regression over all 7 BA conditions yields $R^2 = 0.001$, $p = 0.95$:
+the $m = 1$ outlier (Δf=0 despite the lowest overlap) drives the fit to zero
+because the tree-degenerate mechanism breaks the general trend.
 The $m = 1$ case is a tree graph: the dominant hub is immediately identified
 as critical by both BC and EC, leaving no room for differential targeting.
 For $m \geq 2$, denser BA graphs concentrate high-degree nodes that score
@@ -274,7 +277,10 @@ highly by both metrics, increasing overlap and compressing the gap.
 
 \textbf{WS} networks show the richest behavior: $\Delta f$ peaks at
 $\beta = 0.05$ ($\Delta f = 0.38$) and decreases monotonically for
-$\beta \geq 0.05$ ($R^2 = 0.69$, $p = 0.011$, significant).
+$\beta \geq 0.05$, reaching $0.07$ at $\beta = 1.0$.
+A linear regression over all 8 WS conditions gives $R^2 = 0.69$, $p = 0.011$;
+the non-monotone step from $\beta=0.01$ ($\Delta f = 0.24$) to $\beta=0.05$
+($\Delta f = 0.38$) is the only deviation from an otherwise strong negative trend.
 The peak at $\beta = 0.05$ rather than $\beta = 0.01$ reflects a sweet spot:
 at $\beta = 0.01$ the network is nearly a regular lattice with uniformly
 moderate betweenness (many parallel paths), while at $\beta = 0.05$ there
@@ -325,8 +331,9 @@ right by coincidence.
            Error bars show $\pm 1$ SD across 20 realizations.
            Overall $r = -0.711$, $p = 0.0001$; WS alone: $r = -0.930$,
            $p = 0.0008$. The dashed line is the overall OLS trend.
-           BA $m=1$ (triangle) is the tree-degenerate outlier discussed in
-           the text.}
+           BA $m=1$ is the tree-degenerate outlier discussed in the text:
+           $\Delta f = 0$ despite low overlap because both metrics immediately
+           identify the dominant hub on the first removal batch.}
   \label{fig:overlap}
 \end{figure}
 
