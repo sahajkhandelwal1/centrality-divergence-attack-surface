@@ -189,138 +189,82 @@ def fig4():
     print('Saved fig4')
 
 
-# ── Fig A: EC score variance collapse ─────────────────────────────────────────
+# ── Fig A: Δf vs structural parameter (3 panels, R² annotated) ────────────────
 
 def fig_a():
-    EPS = 0.01
-    per_model = {
-        'er': [(2,    r'ER $\langle k\rangle$=2'),  (10,  r'ER $\langle k\rangle$=10')],
-        'ba': [(1,    'BA m=1'),                      (10,  'BA m=10')],
-        'ws': [(0.01, r'WS $\beta$=0.01'),            (1.0, r'WS $\beta$=1.0')],
+    from scipy.stats import linregress
+    import csv as _csv
+    model_params = {
+        'er': (ER_PARAMS['mean_k'], r'$\langle k \rangle$'),
+        'ba': (BA_PARAMS['m'],      r'$m$'),
+        'ws': (WS_PARAMS['beta'],   r'$\beta$'),
     }
     fig, axes = plt.subplots(1, 3, figsize=(COL_W * 2, 2.2))
-    for ax, (model, conds) in zip(axes, per_model.items()):
-        for pv, label in conds:
+    for ax, (model, (pvs, xlabel)) in zip(axes, model_params.items()):
+        xs, ys = [], []
+        for pv in pvs:
             try:
                 data = load(model, pv, 1000)
             except FileNotFoundError:
                 continue
             f = data['f_values']
-            v = data['var_ec'].mean(axis=0)
-            ax.plot(f, v / (v[0] + 1e-12), lw=1.2, label=label)
-        ax.axhline(EPS, color='k', ls=':', lw=0.8, label=f'ε={EPS}')
-        ax.set_xlabel('f', fontsize=7)
-        ax.set_ylabel('Relative EC variance', fontsize=7)
-        ax.set_title(model.upper(), fontsize=7)
-        ax.legend(fontsize=5)
+            fc_bc = float(f[find_threshold(data['chi_bc'].mean(0))])
+            fc_ec = float(f[find_threshold(data['chi_ec'].mean(0))])
+            xs.append(float(pv))
+            ys.append(fc_ec - fc_bc)
+        xs, ys = np.array(xs), np.array(ys)
+        slope, intercept, r, p, _ = linregress(xs, ys)
+        ax.scatter(xs, ys, color=COLORS[model], s=30, edgecolors='k', linewidths=0.4, zorder=3)
+        if p < 0.05:
+            xfit = np.linspace(xs.min(), xs.max(), 100)
+            ax.plot(xfit, intercept + slope * xfit, color=COLORS[model], lw=1, ls='--')
+        ax.set_xlabel(xlabel, fontsize=7)
+        ax.set_ylabel(r'$\Delta f$', fontsize=7)
+        ax.set_title(f'{model.upper()}  $R^2$={r**2:.2f}'
+                     + (f'  $p$={p:.3f}' if p < 0.05 else '  n.s.'), fontsize=6)
         ax.tick_params(labelsize=5)
     fig.tight_layout()
-    fig.savefig(f'{FIG_DIR}/fig_a_ec_variance.pdf', bbox_inches='tight')
+    fig.savefig(f'{FIG_DIR}/fig_a_delta_f_param.pdf', bbox_inches='tight')
     plt.close(fig)
     print('Saved fig_a')
 
 
-# ── Fig B: f* vs. structural parameter ────────────────────────────────────────
+# ── Fig B: Bridge-prestige overlap vs Δf ──────────────────────────────────────
 
 def fig_b():
     import csv as _csv
+    from scipy.stats import linregress, pearsonr
     try:
-        rows = list(_csv.DictReader(open('results/f_star.csv')))
+        rows = list(_csv.DictReader(open('results/overlap.csv')))
     except FileNotFoundError:
-        print('fig_b skipped: results/f_star.csv not found — run scripts/extract_f_star.py first')
+        print('fig_b skipped: results/overlap.csv not found — run scripts/bridge_overlap.py first')
         return
-    fig, axes = plt.subplots(1, 3, figsize=(COL_W * 2, 2.2))
-    xlabels = {'er': r'$\langle k\rangle$', 'ba': 'm', 'ws': r'$\beta$'}
-    for ax, model in zip(axes, ['er', 'ba', 'ws']):
-        pts = sorted(
-            (float(r['param']), float(r['f_star_mean']), float(r['f_star_std']))
-            for r in rows if r['model'] == model
-        )
-        if not pts:
-            continue
-        xs, ys, errs = zip(*pts)
-        ax.errorbar(xs, ys, yerr=errs, fmt='o-', color=COLORS[model],
-                    lw=1, ms=4, capsize=2, elinewidth=0.7)
-        ax.set_xlabel(xlabels[model], fontsize=7)
-        ax.set_ylabel(r'$f^*$', fontsize=7)
-        ax.set_title(model.upper(), fontsize=7)
-        ax.tick_params(labelsize=5)
-    fig.tight_layout()
-    fig.savefig(f'{FIG_DIR}/fig_b_f_star.pdf', bbox_inches='tight')
-    plt.close(fig)
-    print('Saved fig_b')
-
-
-# ── Fig C: BC vs EC vs rand S(f) with f* vertical line ───────────────────────
-
-def fig_c():
-    import csv as _csv
-    try:
-        f_star_map = {(r['model'], r['param']): float(r['f_star_mean'])
-                      for r in _csv.DictReader(open('results/f_star.csv'))}
-    except FileNotFoundError:
-        print('fig_c skipped: results/f_star.csv not found — run scripts/extract_f_star.py first')
-        return
-    pairs = {
-        'er': [(2,    r'ER $\langle k\rangle$=2'),  (10,  r'ER $\langle k\rangle$=10')],
-        'ba': [(1,    'BA m=1'),                      (10,  'BA m=10')],
-        'ws': [(0.01, r'WS $\beta$=0.01'),            (1.0, r'WS $\beta$=1.0')],
-    }
-    fig, axes = plt.subplots(3, 2, figsize=(COL_W * 2, 5))
-    for row, (model, conds) in enumerate(pairs.items()):
-        for col, (pv, label) in enumerate(conds):
-            ax = axes[row, col]
-            try:
-                data = load(model, pv, 1000)
-            except FileNotFoundError:
-                continue
-            f = data['f_values']
-            ax.plot(f, data['s_bc'].mean(0),   color=BC_COLOR,  lw=1.2, label='BC')
-            ax.plot(f, data['s_ec'].mean(0),   color=EC_COLOR,  lw=1.2, label='EC')
-            ax.plot(f, data['s_rand'].mean(0), color='#888888', lw=1.0, ls='--', label='rand')
-            fstar = f_star_map.get((model, str(pv)))
-            if fstar is not None:
-                ax.axvline(fstar, color='k', ls=':', lw=0.8, label=f'f*={fstar:.2f}')
-            ax.set_title(label, fontsize=5)
-            ax.set_xlabel('f', fontsize=5)
-            ax.set_ylabel('S/N', fontsize=5)
-            ax.legend(fontsize=4)
-            ax.tick_params(labelsize=4)
-    fig.tight_layout()
-    fig.savefig(f'{FIG_DIR}/fig_c_ec_vs_rand.pdf', bbox_inches='tight')
-    plt.close(fig)
-    print('Saved fig_c')
-
-
-# ── Fig D: Predicted vs observed Δf regression ────────────────────────────────
-
-def fig_d():
-    import csv as _csv
-    try:
-        rows = list(_csv.DictReader(open('results/regression.csv')))
-    except FileNotFoundError:
-        print('fig_d skipped: results/regression.csv not found — run scripts/regression_delta_f.py first')
-        return
-    fig, ax = plt.subplots(figsize=(COL_W, 2.8))
+    fig, ax = plt.subplots(figsize=(COL_W * 1.2, 2.8))
+    all_ov, all_df = [], []
     for model in ['er', 'ba', 'ws']:
-        pts = [(float(r['delta_f']), float(r['predicted']))
+        pts = [(float(r['overlap_mean']), float(r['overlap_std']), float(r['delta_f']))
                for r in rows if r['model'] == model]
         if not pts:
             continue
-        obs, pred = zip(*pts)
-        r2 = float(next(r['r2'] for r in rows if r['model'] == model))
-        ax.scatter(obs, pred, color=COLORS[model], label=f'{model.upper()} R²={r2:.2f}',
-                   s=40, edgecolors='k', linewidths=0.4, zorder=3)
-    lims = [min(ax.get_xlim()[0], ax.get_ylim()[0]),
-            max(ax.get_xlim()[1], ax.get_ylim()[1])]
-    ax.plot(lims, lims, 'k--', lw=0.8)
-    ax.set_xlabel(r'Observed $\Delta f$', fontsize=9)
-    ax.set_ylabel(r'Predicted $\Delta f$', fontsize=9)
-    ax.legend(fontsize=7)
+        ovs, stds, dfs = zip(*pts)
+        ax.errorbar(ovs, dfs, xerr=stds, fmt='o', color=COLORS[model],
+                    label=model.upper(), ms=5, lw=0.7, capsize=2,
+                    elinewidth=0.7, zorder=3)
+        all_ov.extend(ovs)
+        all_df.extend(dfs)
+    # overall trend line
+    all_ov, all_df = np.array(all_ov), np.array(all_df)
+    slope, intercept, r, p, _ = linregress(all_ov, all_df)
+    xfit = np.linspace(all_ov.min(), all_ov.max(), 100)
+    ax.plot(xfit, intercept + slope * xfit, 'k--', lw=0.9,
+            label=f'All: $r$={r:.2f}, $p$={p:.3f}')
+    ax.set_xlabel('Top-50 BC/EC node overlap', fontsize=9)
+    ax.set_ylabel(r'$\Delta f = f_c^{\rm EC} - f_c^{\rm BC}$', fontsize=9)
+    ax.legend(fontsize=6)
     fig.tight_layout()
-    fig.savefig(f'{FIG_DIR}/fig_d_regression.pdf', bbox_inches='tight')
+    fig.savefig(f'{FIG_DIR}/fig_b_overlap.pdf', bbox_inches='tight')
     plt.close(fig)
-    print('Saved fig_d')
+    print('Saved fig_b')
 
 
 # ── Fig 7: FSS ────────────────────────────────────────────────────────────────
@@ -363,7 +307,5 @@ if __name__ == '__main__':
     fig4()
     fig_a()
     fig_b()
-    fig_c()
-    fig_d()
     fig7()
     print(f'\nAll figures saved to {FIG_DIR}/')
