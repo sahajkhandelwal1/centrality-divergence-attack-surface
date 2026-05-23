@@ -12,3 +12,6 @@ paper/*.toc
 paper/*.bbl
 paper/*.blg
 paper/*.synctex.gz
+media/videos/simulation/1080p60/
+media/videos/simulation/*/partial_movie_files/
+media/texts/

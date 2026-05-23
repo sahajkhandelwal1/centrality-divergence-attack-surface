@@ -285,17 +285,19 @@ class AttackSimulation(Scene):
             )
 
         # ── Collapse reveal ───────────────────────────────────────────────────
+        bc_final = bc_steps[collapse]["giant_frac"]
         ec_final = ec_steps[min(collapse, len(ec_steps) - 1)]["giant_frac"]
 
-        collapsed = Text(
-            "COLLAPSED", font_size=46, color=RED, weight=BOLD,
-        ).move_to([-3.5, 0.4, 0])
-        intact = Text(
-            f"Still\n{ec_final*100:.0f}% intact",
-            font_size=38, color=GREEN, weight=BOLD,
-        ).move_to([3.5, 0.4, 0])
+        bc_intact = Text(
+            f"{bc_final*100:.0f}% intact",
+            font_size=54, color=BC_COL, weight=BOLD,
+        ).move_to([-3.5, -3.3, 0])
+        ec_intact = Text(
+            f"{ec_final*100:.0f}% intact",
+            font_size=54, color=EC_COL, weight=BOLD,
+        ).move_to([3.5, -3.3, 0])
 
-        # Approximate f_c annotation
+        # Approximate Δf annotation centred between panels
         fc_bc_approx = collapse / N
         fc_ec_approx = next(
             (i for i, s in enumerate(ec_steps) if s["giant_frac"] < COLLAPSE_FRAC),
@@ -305,11 +307,12 @@ class AttackSimulation(Scene):
         delta_label = Text(
             rf"Δf ≈ {delta_f:.2f}",
             font_size=26, color=YELLOW,
-        ).move_to([0, -2.8, 0])
+        ).move_to([0, -3.3, 0])
 
         self.play(
-            FadeIn(collapsed, scale=1.5),
-            FadeIn(intact, scale=1.2),
+            FadeOut(ctr_L, ctr_R),
+            FadeIn(bc_intact, scale=1.3),
+            FadeIn(ec_intact, scale=1.3),
             run_time=1.0,
         )
         self.play(FadeIn(delta_label), run_time=0.6)
