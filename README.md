@@ -2,8 +2,6 @@
 
 A research codebase and paper studying **why betweenness centrality (BC) universally outperforms eigenvector centrality (EC) as a targeted-attack strategy** across three canonical random graph families. The core finding is structural: BC identifies bridge nodes that control inter-cluster flow, while EC identifies prestige nodes embedded in dense neighborhoods. Bridge targeting is more effective for network fragmentation, and the magnitude of the advantage is predicted by how much the two metrics' top-node sets diverge.
 
-Target venue: **IEEE Transactions on Network Science and Engineering** (IEEEtran journal format).
-
 ---
 
 ## Core Question
