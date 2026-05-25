@@ -1,44 +1,50 @@
 \documentclass[journal]{IEEEtran}
 \usepackage{amsmath,amssymb,graphicx,booktabs,hyperref,cite}
-\usepackage{float}   % [H] placement specifier
 \graphicspath{{../figures/}}
 
 \begin{document}
 
-\title{Bridge Nodes vs.\ Prestige Nodes: Why Betweenness Centrality Outperforms
-Eigenvector Centrality in Targeted Network Dismantling}
+\title{Predicting Centrality-Guided Attack Effectiveness from Bridge--Prestige Node Overlap Across Random Graph Families}
 
-\author{\IEEEauthorblockN{Author Name}
-\IEEEauthorblockA{Department of Computer Science\\
-Institution Name\\
-City, Country\\
-email@institution.edu}}
+\author{\IEEEauthorblockN{Sahaj Khandelwal}
+\IEEEauthorblockA{Leigh High School\\
+San Jose, California, USA\\
+sahajkhandelwal2@gmail.com}}
 
 \maketitle
 
 \begin{abstract}
-We investigate why betweenness centrality~(BC) universally outperforms
-eigenvector centrality~(EC) as a targeted-attack strategy across three
-canonical random graph families.
-Defining the \emph{centrality divergence attack surface}~(CDAS) as
-$\Delta f = f_c^{\rm EC} - f_c^{\rm BC}$, the gap between the two
-attackers' percolation thresholds, we measure $\Delta f$ ranging from
-$0$ (tree-like BA, $m=1$) to $0.38$ (WS, $\beta=0.05$) across
-23 network conditions ($N=1000$, 100 realizations each).
-We show that the gap is mechanistically explained by a structural distinction:
-BC identifies \emph{bridge nodes}---those controlling inter-cluster flow---while
-EC identifies \emph{prestige nodes}---those embedded in dense, high-degree
-neighborhoods.
-Bridge targeting is universally more effective for network fragmentation.
-Measuring the overlap between the top-50 BC and EC node sets on intact networks,
-we find that overlap strongly predicts $\Delta f$ across all conditions
-($r = -0.711$, $p = 0.0001$); the effect is strongest in Watts--Strogatz~(WS)
-networks ($r = -0.930$, $p = 0.0008$), where near-lattice topology concentrates
-bridge-like structure that EC systematically undervalues.
-The gap peaks at $\Delta f = 0.38$ for WS at rewiring probability $\beta = 0.05$
-and is structurally invariant in Erd\H{o}s--R\'enyi~(ER) networks
-($\Delta f \approx 0.06$ regardless of mean degree).
-Finite-size scaling confirms threshold stability by $N = 1000$.
+Betweenness centrality~(BC) and eigenvector centrality~(EC) both claim
+to identify the most important nodes in a network, yet BC-guided targeted
+attacks consistently fragment networks far earlier than EC-guided attacks.
+No principled mechanistic explanation for this universal advantage has
+been established.
+To provide an explanation, we define the \emph{centrality divergence attack surface}~(CDAS) as
+$\Delta f = f_c^{\rm EC} - f_c^{\rm BC}$, which is the signed gap between the two
+attackers' percolation thresholds under batched adaptive removal. We then sweep
+23 conditions across Erd\H{o}s--R\'enyi~(ER), Barab\'asi--Albert~(BA),
+and Watts--Strogatz~(WS) graph families at $N = 1000$ with 100 realizations
+each.
+BC and EC identify structurally different node populations: BC targets
+\emph{bridge nodes}, which are those controlling inter-cluster flow along shortest
+paths, while EC targets \emph{prestige nodes}---those embedded in dense,
+high-degree neighborhoods.
+Bridge targeting is shown to be universally more effective for network fragmentation.
+We operationalize this distinction as the bridge--prestige overlap
+$\Omega_{50}$, the fraction of top-50 BC nodes also ranked in the top-50
+by EC on the intact network, and show that $\Omega_{50}$ strongly predicts
+$\Delta f$ across all 23 conditions ($r = -0.711$, $p = 0.0001$).
+The effect is strongest in WS networks ($r = -0.930$, $p = 0.0008$),
+where near-lattice topology concentrates bridge structure that EC undervalues; $\Delta f$ peaks at $0.38$ for $\beta = 0.05$,
+where a set of rewired long-range edges creates clearly identifiable
+bridges with elevated BC while EC remains anchored to local cluster
+density.
+In ER networks $\Delta f \approx 0.06$ regardless of mean degree, which is a reflection of
+the homogeneous distribution of bridge-like roles in random topologies.
+Finite-size scaling confirms threshold stability within $\pm 0.02$ by
+$N = 1000$.
+These results give practitioners a basis for centrality measure
+selection in both attack and defense contexts.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -50,8 +56,8 @@ finite-size scaling
 % ── 1. Introduction ───────────────────────────────────────────────────────────
 \section{Introduction}
 
-Targeted attacks on networks---selectively removing nodes ordered by a
-centrality measure---are far more damaging than random failures and have been
+Targeted attacks on networks, where attackers selectively remove nodes ordered by a
+centrality measure, are far more damaging than random failures and have been
 studied extensively in the context of infrastructure resilience, epidemic
 containment, and network defense~\cite{albert2000error,newman2003structure}.
 The choice of centrality measure determines which nodes are attacked first and
@@ -201,7 +207,7 @@ in WS networks at low $\beta$: BC highlights the few rewired long-range
 connections while EC highlights the densely clustered local neighborhoods.
 This visual distinction motivates the mechanistic hypothesis.
 
-\begin{figure}[H]
+\begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{fig1_network_viz.pdf}
   \caption{Representative network visualizations for six conditions (top row: BC,
@@ -220,7 +226,7 @@ are \emph{not} perfectly correlated even on intact networks.
 The WS $\beta = 0.01$ case shows the largest initial rank divergence,
 consistent with its maximal $\Delta f$.
 
-\begin{figure}[H]
+\begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{fig2_rank_scatter.pdf}
   \caption{BC rank vs.\ EC rank for three intact networks
@@ -241,7 +247,7 @@ smallest for ER regardless of density.
 Random removal (dashed) always lasts longest, confirming both targeted
 strategies provide dismantling advantage.
 
-\begin{figure*}[!t]
+\begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{fig3_attack_curves.pdf}
   \caption{Giant fraction $S(f)$ (left column of each pair) and susceptibility
@@ -268,7 +274,7 @@ BC advantage does not grow with density.
 In \textbf{BA} networks, $\Delta f$ is degenerate at $m = 1$ ($\Delta f = 0$)
 and then decreases from $0.09$ at $m = 2$ to $0.04$ at $m = 10$.
 A linear regression over all 7 BA conditions yields $R^2 = 0.001$, $p = 0.95$:
-the $m = 1$ outlier (Δf=0 despite the lowest overlap) drives the fit to zero
+the $m = 1$ outlier ($\Delta f$=0 despite the lowest overlap) drives the fit to zero
 because the tree-degenerate mechanism breaks the general trend.
 The $m = 1$ case is a tree graph: the dominant hub is immediately identified
 as critical by both BC and EC, leaving no room for differential targeting.
@@ -289,7 +295,7 @@ identifies.
 As $\beta \to 1$ the topology randomizes, bridge structure dissolves,
 and the two metrics converge.
 
-\begin{figure}[H]
+\begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{fig_a_delta_f_param.pdf}
   \caption{$\Delta f$ vs.\ structural parameter for ER (left), BA (center),
@@ -323,12 +329,12 @@ is not the global overlap statistic but whether the \emph{first} removal batch
 includes the structurally critical nodes---and in trees, both metrics get this
 right by coincidence.
 
-\begin{figure}[H]
+\begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{fig_b_overlap.pdf}
   \caption{Bridge--prestige overlap $\Omega_{50}$ (fraction of top-50 BC nodes
            also in top-50 EC nodes on the intact network) vs.\ $\Delta f$.
-           Error bars show $\pm 1$ SD across 20 realizations.
+           Error bars show $\pm 1$ SD across 100 realizations.
            Overall $r = -0.711$, $p = 0.0001$; WS alone: $r = -0.930$,
            $p = 0.0008$. The dashed line is the overall OLS trend.
            BA $m=1$ is the tree-degenerate outlier discussed in the text:
@@ -349,7 +355,7 @@ Crucially, all $\tau_{\rm initial}$ values are well below 1 (range: $0.13$--$0.7
 confirming that ranking disagreement is already present on intact networks
 and is not an artifact of numerical degradation during the attack.
 
-\begin{figure}[H]
+\begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{fig4_main_scatter.pdf}
   \caption{$\Delta f$ vs.\ initial Kendall $\tau$ between BC and EC rankings
@@ -369,7 +375,7 @@ confirming that $N = 1000$ provides stable estimates.
 The gap $\Delta f$ is stable across system sizes, ruling out finite-size
 artifacts as the explanation for the observed differences.
 
-\begin{figure}[H]
+\begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{fig7_fss.pdf}
   \caption{Finite-size scaling of $f_c^{\rm BC}$ and $f_c^{\rm EC}$ for
@@ -402,35 +408,84 @@ than removing prestige-rich nodes embedded in well-connected clusters.
 
 \subsection{The WS Sweet Spot at \(\beta = 0.05\)}
 
-The peak of $\Delta f$ at $\beta = 0.05$ rather than $\beta \to 0$ is
+The peak of $\Delta f$ at $\beta = 0.05$ rather than $\beta\to0$ is
 mechanistically interpretable.
 In a nearly regular ring lattice ($\beta = 0.01$), betweenness is
-quasi-uniformly distributed: every node lies on roughly equal numbers of
+quasi-uniformly distributed. Every node lies on roughly equal numbers of
 shortest paths because the network has many redundant parallel routes.
 The first removal batch therefore cannot single out the truly critical
-nodes---there are many candidates with similar BC.
+nodes, as there are many candidates with similar BC.
 At $\beta = 0.05$, the $\sim 0.05 \times Nk_{\rm ws}/2 \approx 150$ rewired
 edges create a sparse but clearly identifiable set of long-range bridges
-with markedly elevated BC, while EC remains focused on local cluster density.
+with elevated BC, while EC remains focused on local cluster density.
 This concentration of bridge structure at intermediate rewiring is the
 mechanism behind the $\Delta f$ peak.
 
-\subsection{Implications for Network Defense}
+\subsection{Real-World Implications}
 
-These results have direct implications for protecting real-world networks.
-If an adversary is constrained to remove nodes sequentially by a single
-centrality measure, the network operator should ensure that the most critical
-bridge nodes---those with high BC---are hardened or made redundant before
-prestige-rich hub nodes.
-In WS-like networks (infrastructure grids, transportation networks with
-near-regular topology), the BC advantage is largest, and defensive resources
-should be concentrated on the sparse set of long-range connector nodes.
-In ER-like random networks, the gap is small and invariant, so either metric
-provides similar vulnerability information.
+These results connect directly to network protection and disruption
+across several applied domains.
+
+\textbf{Transportation and street networks.}
+Road networks in cities with near-regular grid structure and sparse arterial
+connectors are structurally analogous to WS networks at low $\beta$: local
+streets form a near-lattice, while a small number of highways and bridges
+serve as long-range connectors.
+Our results suggest that in such topologies, the nodes controlling arterial
+flow---intersections on critical bridge routes---are far more important
+targets for both attack and defense than high-traffic hub intersections in
+dense commercial areas.
+A city planner hardening infrastructure against disruption should therefore
+prioritize redundancy in long-range connectors over capacity at busy
+prestige nodes.
+
+\textbf{Epidemic containment.}
+Network fragmentation under targeted node removal is formally analogous
+to targeted immunization: removing a node corresponds to vaccinating or
+quarantining an individual, and the percolation threshold $f_c$ corresponds
+to the fraction of the population that must be immunized to prevent a
+giant outbreak~\cite{pastorsatorras2002}.
+Our result translates directly: immunizing individuals who bridge otherwise
+separate social clusters---those with high BC---is more effective at
+fragmenting the contact network than immunizing socially prestigious or
+highly connected individuals identified by EC.
+In community-structured populations, which resemble WS networks at
+intermediate $\beta$, the gap between these strategies is largest, and
+bridge-targeted immunization achieves containment while vaccinating
+substantially fewer individuals.
+
+\textbf{Internet and communication infrastructure.}
+Sparse communication networks and peer-to-peer systems approximate BA
+networks at low $m$, where our results show the largest $\Delta f$ values
+excluding the degenerate $m=1$ tree case.
+An adversary with only EC computation capability faces a dramatically
+weaker attack in these topologies: the EC-guided attacker targets
+high-degree prestige nodes that are well-connected locally but do not
+control inter-cluster routing.
+Network operators can exploit this asymmetry defensively---engineering
+toward topologies where BC and EC overlap is high reduces the attack
+surface available to a BC-capable adversary, since the two measures
+converge and neither provides a strong structural advantage over the other.
+
+\textbf{General defensive principle.}
+Across all three domains, a unified recommendation emerges: measure
+bridge--prestige overlap $\Omega_{50}$ on your network before allocating
+defensive resources.
+Low $\Omega_{50}$ signals that BC and EC are identifying fundamentally
+different node populations, and that an adversary using BC has a large
+structural advantage over one using EC.
+In that regime, defensive hardening must prioritize bridge nodes---those
+controlling inter-cluster shortest paths---over prestige nodes embedded
+in dense neighborhoods.
+High $\Omega_{50}$ signals that the two measures agree, the gap is small,
+and either metric provides adequate vulnerability information.
+This overlap statistic requires only a single centrality computation on
+the intact network and is therefore practical for real infrastructure
+assessment without requiring full attack simulation.
 
 \subsection{Limitations}
 
-All sweeps use $N = 1000$ and $n_{\rm real} = 100$; while FSS confirms
+All sweeps use $N = 1000$ and $n_{\rm real} = 100$. while FSS confirms
 stability, very large networks ($N \sim 10^5$) may exhibit different
 threshold convergence rates.
 We consider only undirected, unweighted graphs; directed or weighted extensions
@@ -444,9 +499,9 @@ open.
 
 We have established a structural mechanism explaining the universal BC advantage
 in targeted-attack network dismantling.
-BC targets \emph{bridge nodes}---nodes controlling inter-cluster shortest paths
-and hence network conductance---while EC targets \emph{prestige nodes} embedded
-in dense high-degree neighborhoods.
+BC targets \emph{bridge nodes}, which are nodes controlling inter-cluster shortest paths
+and hence network conductance, while EC targets \emph{prestige nodes} embedded
+in dense high-degree and high-importance neighborhoods.
 Bridge targeting is universally more effective for percolation, as quantified
 by $\Delta f = f_c^{\rm EC} - f_c^{\rm BC} > 0$ across all conditions.
 The bridge--prestige overlap $\Omega_{50}$ is a strong predictor of $\Delta f$
@@ -456,9 +511,8 @@ The gap is structurally modulated in WS networks (peaking at $\Delta f = 0.38$
 for $\beta = 0.05$), roughly invariant in ER networks
 ($\Delta f \approx 0.06$), and degenerate for tree-like BA graphs ($m = 1$,
 $\Delta f = 0$).
-These findings provide practitioners with a principled basis for selecting
-targeted-attack strategies and hardening network topologies against adversarial
-removal.
+These findings provide practitioners with a basis for selecting
+targeted-attack strategies and hardening network topologies against removal.
 
 \bibliographystyle{IEEEtran}
 \begin{thebibliography}{10}
@@ -512,6 +566,11 @@ D.~J. Watts and S.~H. Strogatz,
 M.~E.~J. Newman, S.~H. Strogatz, and D.~J. Watts,
 ``Random graphs with arbitrary degree distributions and their applications,''
 \emph{Physical Review E}, vol.~64, no.~2, p.~026118, 2001.
+
+\bibitem{pastorsatorras2002}
+R.~Pastor-Satorras and A.~Vespignani,
+``Immunization of complex networks,''
+\emph{Physical Review E}, vol.~65, no.~3, p.~036104, 2002.
 
 \end{thebibliography}
 
